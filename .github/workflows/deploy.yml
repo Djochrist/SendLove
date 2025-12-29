@@ -1,0 +1,55 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+
+jobs:
+  deploy-render:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.environment != 'staging' || github.event.inputs.environment == null
+
+    steps:
+    - name: Deploy to Render
+      run: |
+        curl -X POST \
+          -H "Authorization: Bearer ${{ secrets.RENDER_DEPLOY_HOOK }}" \
+          -H "Content-Type: application/json" \
+          ${{ secrets.RENDER_DEPLOY_URL }}
+
+  deploy-railway:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.environment == 'staging'
+
+    steps:
+    - name: Deploy to Railway
+      run: |
+        curl -X POST \
+          -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}" \
+          ${{ secrets.RAILWAY_DEPLOY_URL }}
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [deploy-render, deploy-railway]
+    if: always()
+
+    steps:
+    - name: Notify deployment status
+      uses: 8398a7/action-slack@v3
+      if: always()
+      with:
+        status: ${{ job.status }}
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

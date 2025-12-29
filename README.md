@@ -62,11 +62,9 @@ L'application utilise FFmpeg.wasm pour le traitement video futur, React pour le 
 
 ### Aperçu de SendLove en action
 
-<video width="100%" controls>
-  <source src="demo.mp4" type="video/mp4">
-  Votre navigateur ne supporte pas la lecture de vidéos.
-</video>
+[![SendLove Demo](https://img.shields.io/badge/Démonstration-Voir_la_vidéo-FF69B4?style=for-the-badge&logo=video&logoColor=white)](demo.mp4)
 
+*Cliquez sur le bouton ci-dessus pour voir SendLove en action*
 
 </div>
 

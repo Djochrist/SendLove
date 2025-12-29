@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+::selection {
+  background: #fbcfe8;
+  color: #9d174d;
+}
+
+:root {
+  /* Romantic Palette */
+  /* Primary: Deep Ruby Red */
+  --primary: 345 80% 47%;
+  --primary-foreground: 350 100% 98%;
+
+  /* Background: Very Pale Soft Pink */
+  --background: 340 60% 98%;
+  --foreground: 350 40% 20%;
+
+  /* Card: White with a hint of warmth */
+  --card: 0 0% 100%;
+  --card-foreground: 350 40% 20%;
+
+  /* Secondary: Soft Pink/Rose */
+  --secondary: 350 100% 92%;
+  --secondary-foreground: 345 80% 30%;
+
+  /* Accent: Gold/Champagne */
+  --accent: 35 90% 65%;
+  --accent-foreground: 30 40% 20%;
+
+  /* Muted */
+  --muted: 350 30% 96%;
+  --muted-foreground: 350 20% 50%;
+
+  /* Borders */
+  --border: 350 30% 90%;
+  --input: 350 30% 90%;
+  
+  --radius: 1rem;
+  
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-script: 'Great Vibes', cursive;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased font-sans overflow-x-hidden;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(350,100%,92%,0.3) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(35,90%,65%,0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(345,80%,47%,0.05) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif tracking-tight text-foreground;
+  }
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .font-script {
+    font-family: var(--font-script);
+  }
+  
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/50 shadow-xl;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-rose-600 to-rose-400;
+  }
+  
+  .gold-gradient {
+    @apply bg-gradient-to-br from-amber-200 via-amber-400 to-amber-500;
+  }
+}
+
+/* Particle Animation Base */
+.particle {
+  position: absolute;
+  pointer-events: none;
+  animation: float-up linear infinite;
+}
+
+@keyframes float-up {
+  0% {
+    transform: translateY(100vh) scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+    transform: translateY(80vh) scale(1) rotate(45deg);
+  }
+  100% {
+    transform: translateY(-20vh) scale(0.5) rotate(180deg);
+    opacity: 0;
+  }
+}

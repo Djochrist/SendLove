@@ -1,0 +1,118 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+  deployments: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm test -- --watchAll=false
+
+    - name: Build application
+      run: npm run build
+
+    - name: Create release archive
+      run: |
+        tar -czf sendlove-${{ github.ref_name }}.tar.gz \
+          --exclude='.git' \
+          --exclude='node_modules' \
+          --exclude='.env*' \
+          --exclude='*.log' \
+          .
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Get the previous tag
+        PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+        if [ -z "$PREVIOUS_TAG" ]; then
+          PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
+        fi
+
+        # Generate changelog
+        echo "## Changes since $PREVIOUS_TAG" > changelog.md
+        echo "" >> changelog.md
+        git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD >> changelog.md
+        echo "" >> changelog.md
+        echo "**Full changelog:** https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG...${{ github.ref_name }}" >> changelog.md
+
+        # Read changelog content
+        {
+          echo 'changelog<<EOF'
+          cat changelog.md
+          echo EOF
+        } >> $GITHUB_OUTPUT
+
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
+        body: ${{ steps.changelog.outputs.changelog }}
+        draft: false
+        prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
+
+    - name: Upload release assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: sendlove-${{ github.ref_name }}.tar.gz
+        asset_name: sendlove-${{ github.ref_name }}.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Publish to NPM
+      if: contains(github.ref_name, 'v') && !contains(github.ref_name, 'beta') && !contains(github.ref_name, 'alpha')
+      run: npm publish --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  update-docs:
+    runs-on: ubuntu-latest
+    needs: release
+
+    steps:
+    - name: Checkout docs branch
+      uses: actions/checkout@v4
+      with:
+        ref: gh-pages
+        path: docs-site
+
+    - name: Update documentation
+      run: |
+        # Copy latest docs to gh-pages branch
+        cp -r doc/* docs-site/
+        cd docs-site
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Update documentation for ${{ github.ref_name }}" || echo "No changes to commit"
+        git push

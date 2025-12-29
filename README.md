@@ -58,8 +58,6 @@ L'application utilise FFmpeg.wasm pour le traitement video futur, React pour le 
 
 ## Demonstration
 
-<div align="center">
-
 ### Aperçu de SendLove en action
 
 ![SendLove](demo.gif)
@@ -67,9 +65,6 @@ L'application utilise FFmpeg.wasm pour le traitement video futur, React pour le 
 *La démonstration animée montre le fonctionnement de l'interface web et la création de messages romantiques.*
 
 📹 [Voir la vidéo complète (MP4)](demo.mp4)
----
-
-</div>
 
 ## Demarrage rapide
 

@@ -137,7 +137,7 @@ Une documentation complete est disponible dans le dossier [`doc/`](doc/) :
 
 ## Developpement
 
-### Scripts disponibles
+## Scripts disponibles
 
 ```bash
 # Developpement
@@ -145,6 +145,7 @@ npm run dev          # Demarrer le serveur de developpement
 npm run build        # Construire pour la production
 npm run start        # Demarrer le serveur de production
 npm run check        # Verification des types
+```
 
 ## Contribution
 
